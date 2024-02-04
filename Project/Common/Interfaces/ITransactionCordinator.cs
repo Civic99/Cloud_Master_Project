@@ -17,9 +17,12 @@ namespace Common.Interfaces
         Task<bool> PrepareRegisterAsync(UserAuthDto dto);
 
         [OperationContract]
+        Task<bool> PrepareLoginAsync(UserAuthDto dto);
+
+        [OperationContract]
         Task<StatusCode> CommitRegisterAsync(UserAuthDto dto);
 
         [OperationContract]
-        Task<StatusCode> RollbackRegisterAsync(UserAuthDto dto);
+        Task<StatusCode> RollbackAsync();
     }
 }

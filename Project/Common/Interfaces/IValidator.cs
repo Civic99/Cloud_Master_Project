@@ -15,5 +15,8 @@ namespace Common.Interfaces
     {
         [OperationContract]
         Task<StatusCode> RegisterAsync(UserAuthDto user);
+
+        [OperationContract]
+        Task<StatusCode> LoginAsync(UserAuthDto user);
     }
 }

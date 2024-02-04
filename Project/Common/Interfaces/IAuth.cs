@@ -16,6 +16,12 @@ namespace Common.Interfaces
         Task<bool> CheckIfAlreadyExists(UserAuthDto userAuthDto);
 
         [OperationContract]
-        Task<StatusCode> GetPreviousRegisterState();
+        Task<StatusCode> GetPreviousState();
+
+        [OperationContract]
+        Task<StatusCode> Login(UserAuthDto userAuthDto);
+
+        [OperationContract]
+        Task<bool> CheckIfIsAuthorized(UserAuthDto userAuthDto);
     }
 }

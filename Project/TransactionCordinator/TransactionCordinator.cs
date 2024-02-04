@@ -27,25 +27,30 @@ namespace TransactionCordinator
 
         public async Task<bool> PrepareRegisterAsync(UserAuthDto dto)
         {
-            var userProxy = ServiceProxy.Create<IAuth>(new Uri("fabric:/Project/User"), new ServicePartitionKey(1));
+            var userAuthProxy = ServiceProxy.Create<IAuth>(new Uri("fabric:/Project/User"), new ServicePartitionKey(1));
 
-            return await userProxy.CheckIfAlreadyExists(dto);
+            return await userAuthProxy.CheckIfAlreadyExists(dto);
+        }
+
+        public async Task<bool> PrepareLoginAsync(UserAuthDto dto)
+        {
+            var userAuthProxy = ServiceProxy.Create<IAuth>(new Uri("fabric:/Project/User"), new ServicePartitionKey(1));
+
+            return await userAuthProxy.CheckIfIsAuthorized(dto);
         }
 
         public async Task<StatusCode> CommitRegisterAsync(UserAuthDto dto)
         {
             var userProxy = ServiceProxy.Create<IAuth>(new Uri("fabric:/Project/User"), new ServicePartitionKey(1));
 
-            await userProxy.Register(dto);
-
-            return StatusCode.Success;
+            return await userProxy.Register(dto);
         }
 
-        public async Task<StatusCode> RollbackRegisterAsync(UserAuthDto dto)
+        public async Task<StatusCode> RollbackAsync()
         {
             var userProxy = ServiceProxy.Create<IAuth>(new Uri("fabric:/Project/User"), new ServicePartitionKey(1));
 
-            await userProxy.GetPreviousRegisterState();
+            await userProxy.GetPreviousState();
 
             return StatusCode.BadRequest;
         }

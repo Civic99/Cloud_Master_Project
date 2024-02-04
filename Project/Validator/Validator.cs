@@ -40,7 +40,26 @@ namespace Validator
             }
             catch (Exception)
             {
-                await proxy.RollbackRegisterAsync(user);
+                return await proxy.RollbackAsync();
+            }
+        }
+
+        public async Task<StatusCode> LoginAsync(UserAuthDto user)
+        {
+            if (!ValidateUserAuth(user)) return StatusCode.BadRequest;
+
+            var proxy = ServiceProxy.Create<ITransactionCordinator>(new Uri("fabric:/Project/TransactionCordinator"), new ServicePartitionKey(2));
+
+            try
+            {
+                var result = await proxy.PrepareLoginAsync(user);
+
+                if (result) return StatusCode.Success;
+
+                return StatusCode.Unoathorized;
+            }
+            catch (Exception)
+            {
                 return StatusCode.InternalServerError;
             }
         }

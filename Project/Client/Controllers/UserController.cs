@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Client.Controllers
 {
-    [Route("api/user")]
+    [Route("api/[action]")]
     [ApiController]
     public class UserController : Controller
     {
@@ -16,6 +16,13 @@ namespace Client.Controllers
         public async Task<IActionResult> Register(UserAuthDto model)
         {
             var result = await ServiceProxy.Create<IValidator>(new Uri("fabric:/Project/Validator")).RegisterAsync(model);
+            return StatusCodeCheck.HandleStatusCode(result);
+        }
+
+        [HttpPost(Name = "Login")]
+        public async Task<IActionResult> Login(UserAuthDto model)
+        {
+            var result = await ServiceProxy.Create<IValidator>(new Uri("fabric:/Project/Validator")).LoginAsync(model);
             return StatusCodeCheck.HandleStatusCode(result);
         }
     }

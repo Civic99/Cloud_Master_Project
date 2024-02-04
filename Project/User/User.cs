@@ -38,7 +38,7 @@ namespace User
                 while (await enumerator.MoveNextAsync(CancellationToken.None))
                 {
                     var current = enumerator.Current;
-                    if (current.Value.Username == userAuthDto.Username)
+                    if (current.Value.Username.Equals(userAuthDto.Username))
                     {
                         return true;
                     }
@@ -48,7 +48,52 @@ namespace User
             return false;
         }
 
-        public async Task<StatusCode> GetPreviousRegisterState()
+        public async Task<bool> CheckIfIsAuthorized(UserAuthDto userAuthDto)
+        {
+            var userDictionary = await StateManager.GetOrAddAsync<IReliableDictionary<Guid, UserModel>>("Users");
+
+            using (var transaction = StateManager.CreateTransaction())
+            {
+                var enumerableNew = await userDictionary.CreateEnumerableAsync(transaction);
+                var enumerator = enumerableNew.GetAsyncEnumerator();
+
+                while (await enumerator.MoveNextAsync(CancellationToken.None))
+                {
+                    var current = enumerator.Current;
+                    if (current.Value.Username.Equals(userAuthDto.Username) && current.Value.Password.Equals(userAuthDto.Password))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public async Task<StatusCode> Register(UserAuthDto userAuthDto)
+        {
+            var userDictionary = await StateManager.GetOrAddAsync<IReliableDictionary<Guid, UserModel>>("Users");
+
+            using (var transaction = StateManager.CreateTransaction())
+            {
+                await userDictionary.AddAsync(transaction, Guid.NewGuid(), UserAuthMapper.FromDto(userAuthDto));
+
+                await transaction.CommitAsync();
+            }
+
+            return StatusCode.Success;
+        }
+
+        public async Task<StatusCode> Login(UserAuthDto userAuthDto)
+        {
+            var userDictionary = await StateManager.GetOrAddAsync<IReliableDictionary<Guid, UserModel>>("Users");
+
+            //TODO: return dto with current orders
+
+            return StatusCode.Success;
+        }
+
+        public async Task<StatusCode> GetPreviousState()
         {
             var userDictionary = await StateManager.GetOrAddAsync<IReliableDictionary<Guid, UserModel>>("Users");
             var previousUserDictionary = await StateManager.GetOrAddAsync<IReliableDictionary<Guid, UserModel>>("PreviousUsers");
@@ -83,19 +128,6 @@ namespace User
             return StatusCode.InternalServerError;
         }
 
-        public async Task<StatusCode> Register(UserAuthDto userAuthDto)
-        {
-            var userDictionary = await StateManager.GetOrAddAsync<IReliableDictionary<Guid, UserModel>>("Users");
-
-            using (var transaction = StateManager.CreateTransaction())
-            {
-                await userDictionary.AddAsync(transaction, Guid.NewGuid(), UserAuthMapper.FromDto(userAuthDto));
-
-                await transaction.CommitAsync();
-            }
-
-            return StatusCode.Success;
-        }
 
         /// <summary>
         /// Optional override to create listeners (e.g., HTTP, Service Remoting, WCF, etc.) for this service replica to handle client or user requests.
