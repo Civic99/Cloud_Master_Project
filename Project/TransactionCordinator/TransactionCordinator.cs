@@ -46,6 +46,27 @@ namespace TransactionCordinator
             return await userProxy.Register(dto);
         }
 
+        public async Task<StatusCode> CreateOrderAsync(OrderDto dto)
+        {
+            var orderProxy = ServiceProxy.Create<IOrder>(new Uri("fabric:/Project/Order"), new ServicePartitionKey(1));
+
+            return await orderProxy.Create(dto);
+        }
+
+        public async Task<List<OrderDto>> GetAllOrdersAsync(Guid userId)
+        {
+            var orderProxy = ServiceProxy.Create<IOrder>(new Uri("fabric:/Project/Order"), new ServicePartitionKey(1));
+
+            return await orderProxy.GetAll(userId);
+        }
+
+        public async Task<List<ProductDto>> GetAllProductsAsync()
+        {
+            var orderProxy = ServiceProxy.Create<IOrder>(new Uri("fabric:/Project/Order"), new ServicePartitionKey(1));
+
+            return await orderProxy.GetAllProducts();
+        }
+
         public async Task<StatusCode> RollbackAsync()
         {
             var userProxy = ServiceProxy.Create<IAuth>(new Uri("fabric:/Project/User"), new ServicePartitionKey(1));

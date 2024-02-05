@@ -24,6 +24,7 @@ namespace Common.Mappers
             var user = new User();
             user.Username = dto.Username;
             user.Password = dto.Password;
+            user.Id = Guid.NewGuid();
 
             return user;
         }

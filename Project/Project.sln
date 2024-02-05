@@ -5,15 +5,17 @@ VisualStudioVersion = 17.8.34316.72
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{A07B5EB6-E848-4116-A8D0-A826331D98C6}") = "Project", "Project\Project.sfproj", "{070518B1-510A-4FA1-B287-DCD819E7DA52}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{AD93F63E-14B9-4053-8DFE-5BA7833A6C74}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Client", "Client\Client.csproj", "{AD93F63E-14B9-4053-8DFE-5BA7833A6C74}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Validator", "Validator\Validator.csproj", "{F0772323-9A9F-41AE-8630-7389B3AE8A9D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Validator", "Validator\Validator.csproj", "{F0772323-9A9F-41AE-8630-7389B3AE8A9D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransactionCordinator", "TransactionCordinator\TransactionCordinator.csproj", "{FB34E63C-0114-4C8A-A802-EE21DC948F93}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TransactionCordinator", "TransactionCordinator\TransactionCordinator.csproj", "{FB34E63C-0114-4C8A-A802-EE21DC948F93}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "User", "User\User.csproj", "{5F6C3F8F-92D0-4A96-B628-A117A3D4ABE6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "User", "User\User.csproj", "{5F6C3F8F-92D0-4A96-B628-A117A3D4ABE6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{43212427-1B86-4226-A465-1BA9A0F1F96D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{43212427-1B86-4226-A465-1BA9A0F1F96D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Order", "Order\Order.csproj", "{29D02819-74F6-42E8-A2E3-7A65C554817C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +77,14 @@ Global
 		{43212427-1B86-4226-A465-1BA9A0F1F96D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{43212427-1B86-4226-A465-1BA9A0F1F96D}.Release|x64.ActiveCfg = Release|Any CPU
 		{43212427-1B86-4226-A465-1BA9A0F1F96D}.Release|x64.Build.0 = Release|Any CPU
+		{29D02819-74F6-42E8-A2E3-7A65C554817C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29D02819-74F6-42E8-A2E3-7A65C554817C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29D02819-74F6-42E8-A2E3-7A65C554817C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{29D02819-74F6-42E8-A2E3-7A65C554817C}.Debug|x64.Build.0 = Debug|Any CPU
+		{29D02819-74F6-42E8-A2E3-7A65C554817C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29D02819-74F6-42E8-A2E3-7A65C554817C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29D02819-74F6-42E8-A2E3-7A65C554817C}.Release|x64.ActiveCfg = Release|Any CPU
+		{29D02819-74F6-42E8-A2E3-7A65C554817C}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

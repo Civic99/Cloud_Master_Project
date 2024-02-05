@@ -8,18 +8,18 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Client.Controllers
 {
-    [Route("api/[action]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class UserController : Controller
     {
-        [HttpPost(Name = "Register")]
+        [HttpPost]
         public async Task<IActionResult> Register(UserAuthDto model)
         {
             var result = await ServiceProxy.Create<IValidator>(new Uri("fabric:/Project/Validator")).RegisterAsync(model);
             return StatusCodeCheck.HandleStatusCode(result);
         }
 
-        [HttpPost(Name = "Login")]
+        [HttpPost]
         public async Task<IActionResult> Login(UserAuthDto model)
         {
             var result = await ServiceProxy.Create<IValidator>(new Uri("fabric:/Project/Validator")).LoginAsync(model);

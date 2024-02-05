@@ -1,18 +1,17 @@
 ﻿using System.Runtime.Serialization;
 
-
 namespace Common.Models
 {
     [DataContract]
-    public class User
+    public class Order
     {
         [DataMember]
         public Guid Id { get; set; }
+
         [DataMember]
-        public string Username { get; set; }
+        public Guid UserId { get; set; }
+
         [DataMember]
-        public string Password { get; set; }
-        [DataMember]
-        public IEnumerable<Guid> Orders { get; set; }
+        public IEnumerable<Guid> Products { get; set; } 
     }
 }

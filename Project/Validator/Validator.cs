@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Fabric;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -64,10 +65,62 @@ namespace Validator
             }
         }
 
+        public async Task<StatusCode> CreateOrderAsync(OrderDto order)
+        {
+            if (!ValidateOrder(order)) return StatusCode.BadRequest;
+
+            var proxy = ServiceProxy.Create<ITransactionCordinator>(new Uri("fabric:/Project/TransactionCordinator"), new ServicePartitionKey(2));
+
+            try
+            {
+                return await proxy.CreateOrderAsync(order); ;
+            }
+            catch (Exception)
+            {
+                return StatusCode.InternalServerError;
+            }
+        }
+
+        public async Task<List<OrderDto>> GetAllOrderAsync(Guid userId)
+        {
+            var proxy = ServiceProxy.Create<ITransactionCordinator>(new Uri("fabric:/Project/TransactionCordinator"), new ServicePartitionKey(2));
+
+            try
+            {
+                return await proxy.GetAllOrdersAsync(userId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<ProductDto>> GetAllProductsAsync()
+        {
+            var proxy = ServiceProxy.Create<ITransactionCordinator>(new Uri("fabric:/Project/TransactionCordinator"), new ServicePartitionKey(2));
+
+            try
+            {
+                return await proxy.GetAllProductsAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         private bool ValidateUserAuth(UserAuthDto user)
         {
             if (user is null) return false;
             if (string.IsNullOrEmpty(user.Username) || string.IsNullOrEmpty(user.Password)) return false;
+
+            return true;
+        }
+
+        private bool ValidateOrder(OrderDto order)
+        {
+            if (order is null) return false;
+            if (!order.Products.Any()) return false;
 
             return true;
         }

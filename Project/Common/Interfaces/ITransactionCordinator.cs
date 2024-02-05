@@ -24,5 +24,14 @@ namespace Common.Interfaces
 
         [OperationContract]
         Task<StatusCode> RollbackAsync();
+
+        [OperationContract]
+        Task<StatusCode> CreateOrderAsync(OrderDto dto);
+
+        [OperationContract]
+        Task<List<OrderDto>> GetAllOrdersAsync(Guid userId);
+
+        [OperationContract]
+        Task<List<ProductDto>> GetAllProductsAsync();
     }
 }
