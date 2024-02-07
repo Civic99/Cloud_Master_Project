@@ -62,7 +62,6 @@ namespace Order
                             }
 
                             product.Quantity -= orderProduct.Value;
-                            dto.TotalPrice += product.Price * orderProduct.Value;
                         }
                     }
 
@@ -79,7 +78,7 @@ namespace Order
             return StatusCode.Success;
         }
 
-        public async Task<StatusCode> Pay(Guid id)
+        public async Task<StatusCode> Pay(Guid id, OrderType orderType)
         {
             var orderDictionary = await StateManager.GetOrAddAsync<IReliableDictionary<Guid, OrderModel>>("Orders");
 
@@ -95,6 +94,7 @@ namespace Order
                     {
                         var paidOrder = current.Value;
                         paidOrder.OrderStatus = OrderStatus.Paid;
+                        paidOrder.OrderType = orderType;
                         await orderDictionary.AddOrUpdateAsync(transaction, current.Key, current.Value, (k, v) => paidOrder);
                     }
                 }
@@ -186,10 +186,10 @@ namespace Order
         {
             List<Product> products = new()
             {
-                new Product { Id = Guid.NewGuid(), Name = "Buritto", Category = "Mrsno", Description = "Lep bas burito", Price = 500, Quantity = 2 },
-                new Product { Id = Guid.NewGuid(), Name = "Churros", Category = "Mrsno", Description = "Lep bas churros", Price = 250, Quantity = 3 },
-                new Product { Id = Guid.NewGuid(), Name = "Chips", Category = "Posno", Description = "Lep bas chips", Price = 150, Quantity = 5 },
-                new Product { Id = Guid.NewGuid(), Name = "Nachos", Category = "Posno", Description = "Lep bas nachos", Price = 300, Quantity = 2 },
+                new Product { Id = Guid.NewGuid(), Name = "Buritto", Category = "Mrsno", Description = "Lep bas burito", Price = 500, Quantity = 10 },
+                new Product { Id = Guid.NewGuid(), Name = "Churros", Category = "Mrsno", Description = "Lep bas churros", Price = 250, Quantity = 11 },
+                new Product { Id = Guid.NewGuid(), Name = "Chips", Category = "Posno", Description = "Lep bas chips", Price = 150, Quantity = 12 },
+                new Product { Id = Guid.NewGuid(), Name = "Nachos", Category = "Posno", Description = "Lep bas nachos", Price = 300, Quantity = 13 },
             };
 
             var productDictionary = await StateManager.GetOrAddAsync<IReliableDictionary<Guid, Product>>("Products");

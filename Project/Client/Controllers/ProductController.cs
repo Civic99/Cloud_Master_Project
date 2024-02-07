@@ -7,6 +7,7 @@ using Microsoft.ServiceFabric.Services.Remoting.Client;
 namespace Client.Controllers
 {
     [Route("api/[controller]/[action]")]
+    [ApiController]
     public class ProductController : Controller
     {
         [HttpGet]

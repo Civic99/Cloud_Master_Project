@@ -61,11 +61,11 @@ namespace TransactionCordinator
             return await orderProxy.Create(dto);
         }
 
-        public async Task<StatusCode> PayOrderAsync(Guid id)
+        public async Task<StatusCode> PayOrderAsync(Guid id, OrderType orderType)
         {
             var orderProxy = ServiceProxy.Create<IOrder>(new Uri("fabric:/Project/Order"), new ServicePartitionKey(1));
 
-            return await orderProxy.Pay(id);
+            return await orderProxy.Pay(id, orderType);
         }
 
         public async Task<List<OrderDto>> GetAllOrdersAsync(Guid userId)

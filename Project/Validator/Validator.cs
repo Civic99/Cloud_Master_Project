@@ -105,13 +105,13 @@ namespace Validator
             }
         }
 
-        public async Task<StatusCode> Pay(Guid orderId)
+        public async Task<StatusCode> Pay(Guid orderId, OrderType orderType)
         {
             var proxy = ServiceProxy.Create<ITransactionCordinator>(new Uri("fabric:/Project/TransactionCordinator"), new ServicePartitionKey(2));
 
             try
             {
-                return await proxy.PayOrderAsync(orderId);
+                return await proxy.PayOrderAsync(orderId, orderType);
             }
             catch (Exception)
             {

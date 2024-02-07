@@ -1,12 +1,14 @@
 ﻿using Client.Extensions;
 using Common.DTO;
 using Common.Interfaces;
+using Common.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.ServiceFabric.Services.Remoting.Client;
 
 namespace Client.Controllers
 {
     [Route("api/[controller]/[action]")]
+    [ApiController]
     public class OrderController : Controller
     {
         [HttpPost]
@@ -24,9 +26,9 @@ namespace Client.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Pay([FromBody] Guid orderId)
+        public async Task<IActionResult> Pay([FromHeader] Guid orderId, [FromHeader] OrderType orderType)
         {
-            var result = await ServiceProxy.Create<IValidator>(new Uri("fabric:/Project/Validator")).Pay(orderId);
+            var result = await ServiceProxy.Create<IValidator>(new Uri("fabric:/Project/Validator")).Pay(orderId, orderType);
             return StatusCodeCheck.HandleStatusCode(result);
         }
     }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace Common.Mappers
 {
@@ -17,7 +18,8 @@ namespace Common.Mappers
             dto.UserId = order.UserId;
             dto.OrderType = order.OrderType;
             dto.OrderStatus= order.OrderStatus;
-            order.TotalPrice = order.TotalPrice;
+            dto.TotalPrice = order.TotalPrice;
+            dto.OrderId = order.Id;
 
             return dto;
         }

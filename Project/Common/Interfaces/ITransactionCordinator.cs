@@ -35,7 +35,7 @@ namespace Common.Interfaces
         Task<List<ProductDto>> GetAllProductsAsync();
 
         [OperationContract]
-        Task<StatusCode> PayOrderAsync(Guid id);
+        Task<StatusCode> PayOrderAsync(Guid id, OrderType orderType);
 
     }
 }
