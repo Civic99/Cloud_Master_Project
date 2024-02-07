@@ -12,6 +12,15 @@ namespace Common.Models
         public Guid UserId { get; set; }
 
         [DataMember]
-        public IEnumerable<Guid> Products { get; set; } 
+        public Dictionary<Guid, int> Products { get; set; }
+
+        [DataMember]
+        public OrderType OrderType { get; set; }
+
+        [DataMember]
+        public OrderStatus OrderStatus { get; set; }
+
+        [DataMember]
+        public long TotalPrice { get; set; } = 0;
     }
 }

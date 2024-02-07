@@ -32,11 +32,19 @@ namespace TransactionCordinator
             return await userAuthProxy.CheckIfAlreadyExists(dto);
         }
 
-        public async Task<bool> PrepareLoginAsync(UserAuthDto dto)
+        public async Task<UserWithOrdersDto> PrepareLoginAsync(UserAuthDto dto)
         {
             var userAuthProxy = ServiceProxy.Create<IAuth>(new Uri("fabric:/Project/User"), new ServicePartitionKey(1));
 
-            return await userAuthProxy.CheckIfIsAuthorized(dto);
+            var result = await userAuthProxy.CheckIfIsAuthorized(dto);
+
+            if (result.Equals(Guid.Empty)) throw new UnauthorizedAccessException();
+
+            var orderProxy = ServiceProxy.Create<IOrder>(new Uri("fabric:/Project/Order"), new ServicePartitionKey(1));
+
+            var orders = await orderProxy.GetAll(result);
+
+            return new UserWithOrdersDto() { Orders = orders, UserId = result };
         }
 
         public async Task<StatusCode> CommitRegisterAsync(UserAuthDto dto)
@@ -51,6 +59,13 @@ namespace TransactionCordinator
             var orderProxy = ServiceProxy.Create<IOrder>(new Uri("fabric:/Project/Order"), new ServicePartitionKey(1));
 
             return await orderProxy.Create(dto);
+        }
+
+        public async Task<StatusCode> PayOrderAsync(Guid id)
+        {
+            var orderProxy = ServiceProxy.Create<IOrder>(new Uri("fabric:/Project/Order"), new ServicePartitionKey(1));
+
+            return await orderProxy.Pay(id);
         }
 
         public async Task<List<OrderDto>> GetAllOrdersAsync(Guid userId)
@@ -75,6 +90,7 @@ namespace TransactionCordinator
 
             return StatusCode.BadRequest;
         }
+
 
         /// <summary>
         /// Optional override to create listeners (e.g., HTTP, Service Remoting, WCF, etc.) for this service replica to handle client or user requests.

@@ -17,10 +17,17 @@ namespace Client.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromRoute]Guid userId)
+        public async Task<IActionResult> GetAll([FromHeader]Guid userId)
         {
             var result = await ServiceProxy.Create<IValidator>(new Uri("fabric:/Project/Validator")).GetAllOrderAsync(userId);
             return Ok(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Pay([FromBody] Guid orderId)
+        {
+            var result = await ServiceProxy.Create<IValidator>(new Uri("fabric:/Project/Validator")).Pay(orderId);
+            return StatusCodeCheck.HandleStatusCode(result);
         }
     }
 }

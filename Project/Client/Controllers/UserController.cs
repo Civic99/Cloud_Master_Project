@@ -13,17 +13,17 @@ namespace Client.Controllers
     public class UserController : Controller
     {
         [HttpPost]
-        public async Task<IActionResult> Register(UserAuthDto model)
+        public async Task<IActionResult> Register([FromBody]UserAuthDto model)
         {
             var result = await ServiceProxy.Create<IValidator>(new Uri("fabric:/Project/Validator")).RegisterAsync(model);
             return StatusCodeCheck.HandleStatusCode(result);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(UserAuthDto model)
+        public async Task<IActionResult> Login([FromBody]UserAuthDto model)
         {
             var result = await ServiceProxy.Create<IValidator>(new Uri("fabric:/Project/Validator")).LoginAsync(model);
-            return StatusCodeCheck.HandleStatusCode(result);
+            return Ok(result);
         }
     }
 }

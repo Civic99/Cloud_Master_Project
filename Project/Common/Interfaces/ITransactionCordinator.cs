@@ -17,7 +17,7 @@ namespace Common.Interfaces
         Task<bool> PrepareRegisterAsync(UserAuthDto dto);
 
         [OperationContract]
-        Task<bool> PrepareLoginAsync(UserAuthDto dto);
+        Task<UserWithOrdersDto> PrepareLoginAsync(UserAuthDto dto);
 
         [OperationContract]
         Task<StatusCode> CommitRegisterAsync(UserAuthDto dto);
@@ -33,5 +33,9 @@ namespace Common.Interfaces
 
         [OperationContract]
         Task<List<ProductDto>> GetAllProductsAsync();
+
+        [OperationContract]
+        Task<StatusCode> PayOrderAsync(Guid id);
+
     }
 }

@@ -16,5 +16,8 @@ namespace Common.Interfaces
 
         [OperationContract]
         Task<List<ProductDto>> GetAllProducts();
+
+        [OperationContract]
+        Task<StatusCode> Pay(Guid id);
     }
 }

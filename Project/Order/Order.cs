@@ -4,7 +4,10 @@ using System.Fabric;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
+using Common;
 using Common.DTO;
+using Common.Entities;
 using Common.Interfaces;
 using Common.Mappers;
 using Common.Models;
@@ -41,9 +44,60 @@ namespace Order
         public async Task<StatusCode> Create(OrderDto dto)
         {
             var orderDictionary = await StateManager.GetOrAddAsync<IReliableDictionary<Guid, OrderModel>>("Orders");
+
             using (var transaction = StateManager.CreateTransaction())
             {
+                var proxy = ServiceProxy.Create<ITransactionCordinator>(new Uri("fabric:/Project/TransactionCordinator"), new ServicePartitionKey(2));
+                var productsDto = await proxy.GetAllProductsAsync();
+
+                foreach (var product in productsDto)
+                {
+                    foreach (var orderProduct in dto.Products)
+                    {
+                        if (product.Id.Equals(orderProduct.Key))
+                        {
+                            if (product.Quantity < orderProduct.Value)
+                            {
+                                return StatusCode.BadRequest;
+                            }
+
+                            product.Quantity -= orderProduct.Value;
+                            dto.TotalPrice += product.Price * orderProduct.Value;
+                        }
+                    }
+
+                }
+                var products = new List<Product>();
+
                 await orderDictionary.AddAsync(transaction, Guid.NewGuid(), OrderMapper.FromDto(dto));
+                productsDto.ForEach(p => products.Add(ProductMapper.FromDto(p)));
+                await UpdateProducts(products);
+
+                await transaction.CommitAsync();
+            }
+
+            return StatusCode.Success;
+        }
+
+        public async Task<StatusCode> Pay(Guid id)
+        {
+            var orderDictionary = await StateManager.GetOrAddAsync<IReliableDictionary<Guid, OrderModel>>("Orders");
+
+            using (var transaction = StateManager.CreateTransaction())
+            {
+                var enumerableNew = await orderDictionary.CreateEnumerableAsync(transaction);
+                var enumerator = enumerableNew.GetAsyncEnumerator();
+
+                while (await enumerator.MoveNextAsync(CancellationToken.None))
+                {
+                    var current = enumerator.Current;
+                    if (current.Value.Id.Equals(id))
+                    {
+                        var paidOrder = current.Value;
+                        paidOrder.OrderStatus = OrderStatus.Paid;
+                        await orderDictionary.AddOrUpdateAsync(transaction, current.Key, current.Value, (k, v) => paidOrder);
+                    }
+                }
 
                 await transaction.CommitAsync();
             }
@@ -71,7 +125,7 @@ namespace Order
                         orders.Add(current.Value);
                     }
                 }
-                
+
                 orders.ForEach(o => ordersDto.Add(OrderMapper.ToDto(o)));
             }
 
@@ -102,6 +156,32 @@ namespace Order
             return productsDto;
         }
 
+        private async Task UpdateProducts(List<ProductModel> products)
+        {
+            var productDictionary = await StateManager.GetOrAddAsync<IReliableDictionary<Guid, ProductModel>>("Products");
+
+            using (var transaction = StateManager.CreateTransaction())
+            {
+                var enumerableNew = await productDictionary.CreateEnumerableAsync(transaction);
+                var enumerator = enumerableNew.GetAsyncEnumerator();
+
+                while (await enumerator.MoveNextAsync(CancellationToken.None))
+                {
+                    var current = enumerator.Current;
+                    foreach( var item in products)
+                    {
+                        if (current.Value.Id.Equals(item.Id))
+                        {
+                            await productDictionary.AddOrUpdateAsync(transaction, current.Key, current.Value, (k, v) => item);
+                        }
+                    }
+                }
+
+                await transaction.CommitAsync();
+            }
+
+        }
+
         public async Task InitializeAsync()
         {
             List<Product> products = new()
@@ -124,6 +204,50 @@ namespace Order
             await transaction.CommitAsync();
         }
 
+        public async Task Migrate()
+        {
+            var tableClient = AzureTable.GetTableClient("Orders");
+            var orderDictionary = await StateManager.GetOrAddAsync<IReliableDictionary<Guid, OrderModel>>("Orders");
+
+            using (var transaction = StateManager.CreateTransaction())
+            {
+                var enumerableNew = await orderDictionary.CreateEnumerableAsync(transaction);
+                var enumerator = enumerableNew.GetAsyncEnumerator();
+
+                if (await orderDictionary.GetCountAsync(transaction) < 1)
+                {
+                    var orders = tableClient.Query<OrderEntity>();
+
+                    if (orders.Count() > 0)
+                    {
+                        foreach (var order in orders)
+                        {
+                            await orderDictionary.AddAsync(transaction, Guid.Parse(order.RowKey), OrderEntityMapper.FromEntity(order));
+                        }
+
+                        await transaction.CommitAsync();
+                        return;
+                    }
+                }
+
+                while (await enumerator.MoveNextAsync(CancellationToken.None))
+                {
+                    var current = enumerator.Current;
+
+                    try
+                    {
+                        await tableClient.UpsertEntityAsync(OrderEntityMapper.ToEntity(current.Value));
+                    }
+                    catch (Exception)
+                    {
+                        throw;
+                    }
+                }
+            }
+
+            Thread.Sleep(3000);
+        }
+
         /// <summary>
         /// This is the main entry point for your service replica.
         /// This method executes when this replica of your service becomes primary and has write status.
@@ -140,6 +264,8 @@ namespace Order
 
             while (true)
             {
+                await Migrate();
+
                 cancellationToken.ThrowIfCancellationRequested();
 
                 using (var tx = this.StateManager.CreateTransaction())

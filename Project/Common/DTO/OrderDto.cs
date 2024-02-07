@@ -10,6 +10,9 @@ namespace Common.DTO
     public class OrderDto
     {
         public Guid UserId { get; set; }
-        public IEnumerable<Guid> Products { get; set; }
+        public Dictionary<Guid, int> Products { get; set; }
+        public OrderType OrderType { get; set; }
+        public OrderStatus OrderStatus { get; set; }
+        public long TotalPrice { get; set; } = 0;
     }
 }

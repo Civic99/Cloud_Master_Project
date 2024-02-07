@@ -13,6 +13,6 @@ namespace Common.Models
         [DataMember]
         public string Password { get; set; }
         [DataMember]
-        public IEnumerable<Guid> Orders { get; set; }
+        public List<Guid> Orders { get; set; }
     }
 }

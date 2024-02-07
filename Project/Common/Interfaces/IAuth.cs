@@ -22,6 +22,6 @@ namespace Common.Interfaces
         Task<StatusCode> Login(UserAuthDto userAuthDto);
 
         [OperationContract]
-        Task<bool> CheckIfIsAuthorized(UserAuthDto userAuthDto);
+        Task<Guid> CheckIfIsAuthorized(UserAuthDto userAuthDto);
     }
 }

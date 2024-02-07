@@ -17,7 +17,7 @@ namespace Common.Interfaces
         Task<StatusCode> RegisterAsync(UserAuthDto user);
 
         [OperationContract]
-        Task<StatusCode> LoginAsync(UserAuthDto user);
+        Task<UserWithOrdersDto> LoginAsync(UserAuthDto user);
 
         [OperationContract]
         Task<StatusCode> CreateOrderAsync(OrderDto order);
@@ -27,5 +27,8 @@ namespace Common.Interfaces
 
         [OperationContract]
         Task<List<ProductDto>> GetAllProductsAsync();
+
+        [OperationContract]
+        Task<StatusCode> Pay(Guid orderId);
     }
 }

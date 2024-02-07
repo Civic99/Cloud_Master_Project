@@ -15,6 +15,8 @@ using UserModel = Common.Models.User;
 using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 using Common.Mappers;
 using System.Transactions;
+using Azure.Data.Tables;
+using Common.Entities;
 
 namespace User
 {
@@ -48,7 +50,7 @@ namespace User
             return false;
         }
 
-        public async Task<bool> CheckIfIsAuthorized(UserAuthDto userAuthDto)
+        public async Task<Guid> CheckIfIsAuthorized(UserAuthDto userAuthDto)
         {
             var userDictionary = await StateManager.GetOrAddAsync<IReliableDictionary<Guid, UserModel>>("Users");
 
@@ -62,12 +64,12 @@ namespace User
                     var current = enumerator.Current;
                     if (current.Value.Username.Equals(userAuthDto.Username) && current.Value.Password.Equals(userAuthDto.Password))
                     {
-                        return true;
+                        return current.Value.Id;
                     }
                 }
             }
 
-            return false;
+            return Guid.Empty;
         }
 
         public async Task<StatusCode> Register(UserAuthDto userAuthDto)
@@ -87,8 +89,6 @@ namespace User
         public async Task<StatusCode> Login(UserAuthDto userAuthDto)
         {
             var userDictionary = await StateManager.GetOrAddAsync<IReliableDictionary<Guid, UserModel>>("Users");
-
-            //TODO: return dto with current orders
 
             return StatusCode.Success;
         }
@@ -128,6 +128,52 @@ namespace User
             return StatusCode.InternalServerError;
         }
 
+        
+
+        public async Task Migrate()
+        {
+            var tableClient = AzureTable.GetTableClient("Users");
+            var userDictionary = await StateManager.GetOrAddAsync<IReliableDictionary<Guid, UserModel>>("Users");
+
+            using (var transaction = StateManager.CreateTransaction())
+            {
+                var enumerableNew = await userDictionary.CreateEnumerableAsync(transaction);
+                var enumerator = enumerableNew.GetAsyncEnumerator();
+
+                if (await userDictionary.GetCountAsync(transaction) < 1)
+                {
+                    var users = tableClient.Query<UserEntity>();
+
+                    if (users.Count() > 0)
+                    {
+                        foreach (var user in users)
+                        {
+                            await userDictionary.AddAsync(transaction, Guid.Parse(user.RowKey), UserEntityMapper.FromEntity(user));
+                        }
+
+                        await transaction.CommitAsync();
+                        return;
+                    }
+                }
+
+                while (await enumerator.MoveNextAsync(CancellationToken.None))
+                {
+                    var current = enumerator.Current;
+                       
+                    try
+                    {
+                        await tableClient.UpsertEntityAsync(UserEntityMapper.ToEntity(current.Value));
+                    }
+                    catch (Exception)
+                    {
+                        throw;
+                    }
+                }
+            }
+
+            Thread.Sleep(3000);
+        }
+
 
         /// <summary>
         /// Optional override to create listeners (e.g., HTTP, Service Remoting, WCF, etc.) for this service replica to handle client or user requests.
@@ -153,6 +199,7 @@ namespace User
 
             while (true)
             {
+                await Migrate();
                 cancellationToken.ThrowIfCancellationRequested();
 
                 using (var tx = this.StateManager.CreateTransaction())

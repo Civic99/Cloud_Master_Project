@@ -45,23 +45,19 @@ namespace Validator
             }
         }
 
-        public async Task<StatusCode> LoginAsync(UserAuthDto user)
+        public async Task<UserWithOrdersDto> LoginAsync(UserAuthDto user)
         {
-            if (!ValidateUserAuth(user)) return StatusCode.BadRequest;
+            if (!ValidateUserAuth(user)) throw new UnauthorizedAccessException();
 
             var proxy = ServiceProxy.Create<ITransactionCordinator>(new Uri("fabric:/Project/TransactionCordinator"), new ServicePartitionKey(2));
 
             try
             {
-                var result = await proxy.PrepareLoginAsync(user);
-
-                if (result) return StatusCode.Success;
-
-                return StatusCode.Unoathorized;
+                return await proxy.PrepareLoginAsync(user);
             }
             catch (Exception)
             {
-                return StatusCode.InternalServerError;
+                throw;
             }
         }
 
@@ -106,6 +102,20 @@ namespace Validator
             catch (Exception)
             {
                 throw;
+            }
+        }
+
+        public async Task<StatusCode> Pay(Guid orderId)
+        {
+            var proxy = ServiceProxy.Create<ITransactionCordinator>(new Uri("fabric:/Project/TransactionCordinator"), new ServicePartitionKey(2));
+
+            try
+            {
+                return await proxy.PayOrderAsync(orderId);
+            }
+            catch (Exception)
+            {
+                return StatusCode.InternalServerError;
             }
         }
 

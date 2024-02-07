@@ -10,11 +10,14 @@ namespace Common.Mappers
 {
     public static class OrderMapper
     {
-        public static OrderDto ToDto(Order user)
+        public static OrderDto ToDto(Order order)
         {
             var dto = new OrderDto();
-            dto.Products = user.Products;
-            dto.UserId = user.UserId;
+            dto.Products = order.Products;
+            dto.UserId = order.UserId;
+            dto.OrderType = order.OrderType;
+            dto.OrderStatus= order.OrderStatus;
+            order.TotalPrice = order.TotalPrice;
 
             return dto;
         }
@@ -25,6 +28,9 @@ namespace Common.Mappers
             order.Id = Guid.NewGuid();
             order.Products = dto.Products;
             order.UserId = dto.UserId;
+            order.OrderType = dto.OrderType;
+            order.OrderStatus = dto.OrderStatus;
+            order.TotalPrice = dto.TotalPrice;
 
             return order;
         }
