@@ -29,94 +29,148 @@ namespace Validator
         {
             if (!ValidateUserAuth(user)) return StatusCode.BadRequest;
 
-            var proxy = ServiceProxy.Create<ITransactionCordinator>(new Uri("fabric:/Project/TransactionCordinator"), new ServicePartitionKey(2));
+            var fabricClient = new FabricClient();
+            var serviceUri = new Uri("fabric:/Project/TransactionCordinator");
 
-            try
+            var partitionList = await fabricClient.QueryManager.GetPartitionListAsync(serviceUri);
+            foreach (var partition in partitionList)
             {
-                var result = await proxy.PrepareRegisterAsync(user);
+                var partitionKey = new ServicePartitionKey(((Int64RangePartitionInformation)partition.PartitionInformation).LowKey);
+                var proxy = ServiceProxy.Create<ITransactionCordinator>(new Uri("fabric:/Project/TransactionCordinator"), partitionKey);
 
-                if (!result) return await proxy.CommitRegisterAsync(user);
+                try
+                {
+                    var result = await proxy.PrepareRegisterAsync(user);
 
-                return StatusCode.BadRequest;
+                    if (!result) return await proxy.CommitRegisterAsync(user);
+
+                    return StatusCode.BadRequest;
+                }
+                catch (Exception)
+                {
+                    return await proxy.RollbackAsync();
+                }
             }
-            catch (Exception)
-            {
-                return await proxy.RollbackAsync();
-            }
+            return StatusCode.BadRequest;
         }
 
         public async Task<UserWithOrdersDto> LoginAsync(UserAuthDto user)
         {
             if (!ValidateUserAuth(user)) throw new UnauthorizedAccessException();
+            var fabricClient = new FabricClient();
+            var serviceUri = new Uri("fabric:/Project/TransactionCordinator");
 
-            var proxy = ServiceProxy.Create<ITransactionCordinator>(new Uri("fabric:/Project/TransactionCordinator"), new ServicePartitionKey(2));
+            var partitionList = await fabricClient.QueryManager.GetPartitionListAsync(serviceUri);
+            foreach (var partition in partitionList)
+            {
+                var partitionKey = new ServicePartitionKey(((Int64RangePartitionInformation)partition.PartitionInformation).LowKey);
+                var proxy = ServiceProxy.Create<ITransactionCordinator>(new Uri("fabric:/Project/TransactionCordinator"), partitionKey);
 
-            try
-            {
-                return await proxy.PrepareLoginAsync(user);
+                try
+                {
+                    return await proxy.PrepareLoginAsync(user);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
             }
-            catch (Exception)
-            {
-                throw;
-            }
+
+            return new UserWithOrdersDto();
         }
 
         public async Task<StatusCode> CreateOrderAsync(OrderDto order)
         {
             if (!ValidateOrder(order)) return StatusCode.BadRequest;
+            var fabricClient = new FabricClient();
+            var serviceUri = new Uri("fabric:/Project/TransactionCordinator");
 
-            var proxy = ServiceProxy.Create<ITransactionCordinator>(new Uri("fabric:/Project/TransactionCordinator"), new ServicePartitionKey(2));
+            var partitionList = await fabricClient.QueryManager.GetPartitionListAsync(serviceUri);
+            foreach (var partition in partitionList)
+            {
+                var partitionKey = new ServicePartitionKey(((Int64RangePartitionInformation)partition.PartitionInformation).LowKey);
+                var proxy = ServiceProxy.Create<ITransactionCordinator>(new Uri("fabric:/Project/TransactionCordinator"), partitionKey);
 
-            try
-            {
-                return await proxy.CreateOrderAsync(order); ;
+                try
+                {
+                    return await proxy.CreateOrderAsync(order); ;
+                }
+                catch (Exception)
+                {
+                    return StatusCode.InternalServerError;
+                }
             }
-            catch (Exception)
-            {
-                return StatusCode.InternalServerError;
-            }
+
+            return StatusCode.BadRequest;
         }
 
         public async Task<List<OrderDto>> GetAllOrderAsync(Guid userId)
         {
-            var proxy = ServiceProxy.Create<ITransactionCordinator>(new Uri("fabric:/Project/TransactionCordinator"), new ServicePartitionKey(2));
+            var fabricClient = new FabricClient();
+            var serviceUri = new Uri("fabric:/Project/TransactionCordinator");
 
-            try
+            var partitionList = await fabricClient.QueryManager.GetPartitionListAsync(serviceUri);
+            foreach (var partition in partitionList)
             {
-                return await proxy.GetAllOrdersAsync(userId);
+                var partitionKey = new ServicePartitionKey(((Int64RangePartitionInformation)partition.PartitionInformation).LowKey);
+                var proxy = ServiceProxy.Create<ITransactionCordinator>(new Uri("fabric:/Project/TransactionCordinator"), partitionKey);
+
+                try
+                {
+                    return await proxy.GetAllOrdersAsync(userId);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
             }
-            catch (Exception)
-            {
-                throw;
-            }
+            return new List<OrderDto>();
         }
 
         public async Task<List<ProductDto>> GetAllProductsAsync()
         {
-            var proxy = ServiceProxy.Create<ITransactionCordinator>(new Uri("fabric:/Project/TransactionCordinator"), new ServicePartitionKey(2));
+            var fabricClient = new FabricClient();
+            var serviceUri = new Uri("fabric:/Project/TransactionCordinator");
 
-            try
+            var partitionList = await fabricClient.QueryManager.GetPartitionListAsync(serviceUri);
+            foreach (var partition in partitionList)
             {
-                return await proxy.GetAllProductsAsync();
+                var partitionKey = new ServicePartitionKey(((Int64RangePartitionInformation)partition.PartitionInformation).LowKey);
+                var proxy = ServiceProxy.Create<ITransactionCordinator>(new Uri("fabric:/Project/TransactionCordinator"), partitionKey);
+
+                try
+                {
+                    return await proxy.GetAllProductsAsync();
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
             }
-            catch (Exception)
-            {
-                throw;
-            }
+            return new List<ProductDto>();
         }
 
         public async Task<StatusCode> Pay(Guid orderId, OrderType orderType)
         {
-            var proxy = ServiceProxy.Create<ITransactionCordinator>(new Uri("fabric:/Project/TransactionCordinator"), new ServicePartitionKey(2));
+            var fabricClient = new FabricClient();
+            var serviceUri = new Uri("fabric:/Project/TransactionCordinator");
 
-            try
+            var partitionList = await fabricClient.QueryManager.GetPartitionListAsync(serviceUri);
+            foreach (var partition in partitionList)
             {
-                return await proxy.PayOrderAsync(orderId, orderType);
+                var partitionKey = new ServicePartitionKey(((Int64RangePartitionInformation)partition.PartitionInformation).LowKey);
+                var proxy = ServiceProxy.Create<ITransactionCordinator>(new Uri("fabric:/Project/TransactionCordinator"), partitionKey);
+
+                try
+                {
+                    return await proxy.PayOrderAsync(orderId, orderType);
+                }
+                catch (Exception)
+                {
+                    return StatusCode.InternalServerError;
+                }
             }
-            catch (Exception)
-            {
-                return StatusCode.InternalServerError;
-            }
+            return StatusCode.BadRequest;
         }
 
         private bool ValidateUserAuth(UserAuthDto user)

@@ -11,6 +11,7 @@ using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 using Microsoft.ServiceFabric.Data;
+using Common;
 
 namespace Client
 {
@@ -47,6 +48,7 @@ namespace Client
                         builder.Services.AddControllers();
                         builder.Services.AddEndpointsApiExplorer();
                         builder.Services.AddSwaggerGen();
+                        builder.Services.AddSignalR();
 
                         builder.Services.AddCors(options =>
                         {
@@ -65,9 +67,15 @@ namespace Client
                         app.UseSwaggerUI();
                         }
                         app.UseCors("cors");
+                        app.UseRouting();
+                        app.UseEndpoints(endpoints =>
+                        {
+                            endpoints.MapHub<NotificationHub>("/notificationHub");
+                        });
+                        
                         app.UseAuthorization();
                         app.MapControllers();
-                        
+
 
                         return app;
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Fabric;
 using System.Linq;
+using System.ServiceModel.Channels;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -11,6 +12,7 @@ using Common.Entities;
 using Common.Interfaces;
 using Common.Mappers;
 using Common.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.ServiceFabric.Data.Collections;
 using Microsoft.ServiceFabric.Services.Client;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
@@ -27,9 +29,13 @@ namespace Order
     /// </summary>
     internal sealed class Order : StatefulService, IOrder
     {
+
+
         public Order(StatefulServiceContext context)
             : base(context)
-        { }
+        {
+            
+        }
 
         /// <summary>
         /// Optional override to create listeners (e.g., HTTP, Service Remoting, WCF, etc.) for this service replica to handle client or user requests.

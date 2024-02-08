@@ -1,10 +1,15 @@
-import logo from './logo.svg';
-import './App.css';
+import logo from "./logo.svg";
+import "./App.css";
 import Register from "./Pages/RegisterPage";
+import ProductsPage from "./Pages/ProductPage";
+import PayPalScriptProvider from "@paypal/react-paypal-js";
 
 function App() {
   return (
-    <Register />
+    <div>
+      <Register />
+      <ProductsPage />
+    </div>
   );
 }
 
